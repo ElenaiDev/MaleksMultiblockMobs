@@ -1,5 +1,10 @@
 package com.malekire.multiblockmobs.blocks;
 
+import java.util.Random;
+import java.util.Vector;
+
+import javax.annotation.Nullable;
+
 import com.google.common.base.Predicate;
 import com.malekire.multiblockmobs.Main;
 import com.malekire.multiblockmobs.particle.EobEnumParticleTypes;
@@ -7,14 +12,13 @@ import com.malekire.multiblockmobs.particle.ParticleSpawner;
 import com.malekire.multiblockmobs.util.ModChecker;
 import com.malekire.multiblockmobs.util.Reference;
 
-import java.util.Random;
-import java.util.Vector;
-
-import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.BlockWorldState;
 import net.minecraft.block.state.IBlockState;
@@ -24,12 +28,16 @@ import net.minecraft.block.state.pattern.BlockStateMatcher;
 import net.minecraft.block.state.pattern.FactoryBlockPattern;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -46,6 +54,7 @@ public class SoulChassis extends Block {
     private BlockPattern snowmanPattern;
     private BlockPattern golemBasePattern;
     private BlockPattern golemPattern;
+    public static final PropertyDirection FACING = BlockHorizontal.FACING;
 
     public static final AxisAlignedBB SOUL_CHASSIS_AABB = new AxisAlignedBB(0.25D, 0D, 0.25D, 0.75D, 1, 0.75D);
     // public TileEntity entityTile = null;
@@ -90,12 +99,28 @@ public class SoulChassis extends Block {
 
         this.setRegistryName(new ResourceLocation(Reference.MOD_ID, "soul_chassis"));
         this.setUnlocalizedName(this.getRegistryName().toString());
+        
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+
     }
 
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this);
-    }
+	protected BlockStateContainer createBlockState() {
+		 return new BlockStateContainer(this, new IProperty[] { FACING });
+	}
+    
+    @Override
+	public IBlockState getStateFromMeta(int meta) {
+		
+		EnumFacing enumfacing = EnumFacing.getHorizontal(meta);
+
+	        return this.getDefaultState().withProperty(FACING, enumfacing);
+	}
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		
+		return state.getValue(BlockHorizontal.FACING).getHorizontalIndex();
+	}
 
     @Override
     public boolean hasTileEntity(IBlockState state) {
@@ -168,13 +193,56 @@ public class SoulChassis extends Block {
             return false;
     }
 
+    @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         // onBlockAdded();
-
+    	 this.setDefaultFacing(worldIn, pos, state);
         // createTileEntity(worldIn, state);
 
     }
+    private void setDefaultFacing(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            IBlockState iblockstate = worldIn.getBlockState(pos.north());
+            IBlockState iblockstate1 = worldIn.getBlockState(pos.south());
+            IBlockState iblockstate2 = worldIn.getBlockState(pos.west());
+            IBlockState iblockstate3 = worldIn.getBlockState(pos.east());
+            EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
+            if (enumfacing == EnumFacing.NORTH && iblockstate.isFullBlock() && !iblockstate1.isFullBlock())
+            {
+                enumfacing = EnumFacing.SOUTH;
+            }
+            else if (enumfacing == EnumFacing.SOUTH && iblockstate1.isFullBlock() && !iblockstate.isFullBlock())
+            {
+                enumfacing = EnumFacing.NORTH;
+            }
+            else if (enumfacing == EnumFacing.WEST && iblockstate2.isFullBlock() && !iblockstate3.isFullBlock())
+            {
+                enumfacing = EnumFacing.EAST;
+            }
+            else if (enumfacing == EnumFacing.EAST && iblockstate3.isFullBlock() && !iblockstate2.isFullBlock())
+            {
+                enumfacing = EnumFacing.WEST;
+            }
+
+            worldIn.setBlockState(pos, state.withProperty(FACING, enumfacing), 2);
+        }
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+    }
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        worldIn.setBlockState(pos, state.withProperty(FACING, placer.getHorizontalFacing().getOpposite()), 2);
+
+    }
+    
     public boolean blockMatcher(World worldIn, BlockPos pos, Block matcher) {
 
         System.out.println(Block.isEqualTo(worldIn.getBlockState(pos).getBlock(),

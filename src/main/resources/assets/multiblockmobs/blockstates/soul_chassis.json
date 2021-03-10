@@ -1,7 +1,8 @@
 {
-  "variants": {
-    "normal": {
-      "model": "multiblockmobs:soul_chassis"
-    }
-  }
+     "variants": {
+        "facing=north": { "model": "multiblockmobs:soul_chassis" },
+        "facing=east":  { "model": "multiblockmobs:soul_chassis", "y": 90 },
+        "facing=south": { "model": "multiblockmobs:soul_chassis", "y": 180 },
+        "facing=west":  { "model": "multiblockmobs:soul_chassis", "y": 270 }
+        }
 }
