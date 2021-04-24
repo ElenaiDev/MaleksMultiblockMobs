@@ -3,7 +3,6 @@ package com.malekire.multiblockmobs.blocks;
 import com.malekire.multiblockmobs.util.Reference;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -20,17 +19,8 @@ public class ModBlocks {
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
         event.getRegistry().registerAll(soulChassis);
-        // GameRegistry.registerTileEntity(tileEntityData,
-        // "multiblockmobs:soul_chassis");
 
     }
-    /*
-     * public static void register(IForgeRegistry<Block> registry) {
-     * 
-     * 
-     * GameRegistry.registerTileEntity(TileEntityData.getTileEntityClass(),
-     * TileEntityData.getRegistryName().toString()); }
-     */
 
     @SubscribeEvent
     public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
@@ -43,14 +33,6 @@ public class ModBlocks {
     @SubscribeEvent
     public static void registerRenders(ModelRegistryEvent event) {
         registerRender(Item.getItemFromBlock(soulChassis));
-        // registerRender(soulChassis);
-    }
-
-    private static void registerRender(Block block) {
-
-        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(block), 0,
-                new ModelResourceLocation(block.getRegistryName(), "inventory"));
-
     }
 
     public static void registerRender(Item item) {

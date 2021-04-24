@@ -3,6 +3,8 @@ package com.malekire.multiblockmobs;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
@@ -10,7 +12,6 @@ import org.apache.logging.log4j.core.Logger;
 
 import com.google.common.base.Predicate;
 import com.malekire.multiblockmobs.config.ModLocator;
-import com.malekire.multiblockmobs.proxy.CommonProxy;
 import com.malekire.multiblockmobs.util.CommandContainer;
 import com.malekire.multiblockmobs.util.ModChecker;
 import com.malekire.multiblockmobs.util.Reference;
@@ -20,6 +21,7 @@ import net.minecraft.block.state.BlockWorldState;
 import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.block.state.pattern.BlockStateMatcher;
 import net.minecraft.block.state.pattern.FactoryBlockPattern;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.registry.RegistryNamespaced;
@@ -49,6 +51,12 @@ public class Main {
 
     public static Vector<SoundEvent> soundEffectEvents = new Vector<SoundEvent>();
     public static Vector<SoundEvent> musicEvents = new Vector<SoundEvent>();
+    
+    public static Vector<Integer> dimension = new Vector<Integer>();
+    public static Vector<Boolean> dayswitch = new Vector<Boolean>();
+    public static Vector<String> gamestage = new Vector<String>();
+    public static Vector<String> biome = new Vector<String>();
+
 
     public static Vector<ModLocator> entities = new Vector<ModLocator>();
 
@@ -59,18 +67,10 @@ public class Main {
     @Instance
     public static Main instance;
 
-    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.COMMON_PROXY_CLASS)
-    public static CommonProxy proxy;
-
     @Mod.EventHandler
     public static void PreInit(FMLPreInitializationEvent event) {
         ModChecker.checkMods();
         ModChecker.printSuccessMessage();
-        // MinecraftForge.ORE_GEN_BUS.register(new OreGenEventHandler());
-        // GameRegistry.registerWorldGenerator(new OreGenerator(), 0);
-
-        // REGISTRY.register(100, location, new SoundEvent(location));
-        // com.malekire.multiblockmobs.mbe20_tileentity_data.StartupClientOnly.preInitCommon();
     }
 
     public static final RegistryNamespaced<ResourceLocation, SoundEvent> REGISTRY = net.minecraftforge.registries.GameData
@@ -107,6 +107,8 @@ public class Main {
         String modid;
         String thing;
         String character;
+        String prevCharacter = "";
+        int value = 99;
 
         Vector<Vector<String>> blockLocations = new Vector<Vector<String>>();
         while (scnr.hasNextLine()) {
@@ -115,6 +117,9 @@ public class Main {
                 commands.add(new CommandContainer(entities.size(),
                         line.substring(line.indexOf('\"') + 1, line.lastIndexOf('\"'))));
 
+            }
+            if (line.contains("requiredDimension")) {
+                dimension.add(Integer.valueOf(line.substring(line.indexOf('\"') + 1, line.lastIndexOf('\"'))));
             }
             if (line.contains("soundEffectBoolean")) {
                 SoundEventContainer container = new SoundEventContainer();
@@ -147,10 +152,11 @@ public class Main {
                         modid = line.substring(0, line.indexOf(':'));
                         thing = line.substring(line.indexOf(':') + 1, line.indexOf(" "));
                         character = line.substring(line.indexOf('\"') + 1, line.lastIndexOf('\"'));
-                        // System.out.println(modid);
-                        // System.out.println(thing);
-                        // System.out.println(character);
+                        if(prevCharacter == character) {
+                        }
+                        prevCharacter = character;
                         blocks.add(new ModLocator(modid, thing, character));
+
                         lineNumber++;
                         line = scnr.nextLine();
                         init = false;
@@ -181,22 +187,16 @@ public class Main {
                         blockLocations.add(new Vector<>(blockTemp));
 
                         blockTemp.clear();
-                        // System.out.println(blockLocations.get(i3-1).get(0));
-                        // System.out.println(blockLocations.get(i3-1).get(1));
-                        // System.out.println(blockLocations.get(i3-1).get(2));
                         i3++;
                     }
                     loc = false;
                 }
             }
-            // System.out.println(line);
             if (line.contains("!entityStart")) {
                 lineNumber++;
                 line = scnr.nextLine();
                 entities.add(new ModLocator(line.substring(line.indexOf('\"') + 1, line.indexOf(':')),
                         line.substring(line.indexOf(':') + 1, line.lastIndexOf('\"')), ""));
-                // System.out.println(entities.get(0).modID);
-                // System.out.println(entities.get(0).thing);
             }
             lineNumber++;
             if (line.contains("!endMultiblockMob")) {
@@ -204,14 +204,13 @@ public class Main {
                 for (int i = 0; i < blockLocations.size(); i++) {
 
                     for (int i2 = 0; i2 < blockLocations.get(i).size(); i2++) {
-                        // System.out.println(blockLocations.get(i).get(i2));
 
                         tempBlockLoc[i][i2] = blockLocations.get(i).get(i2);
                     }
-                    // System.out.println("");
 
                     FactoryBlockPattern patterntest = FactoryBlockPattern.start().aisle(tempBlockLoc[i]);
                     for (int i3 = 0; i3 < blocks.size(); i3++) {
+                    	
                         patterntest.where(blocks.get(i3).character.charAt(0),
                                 getBlock(blocks.get(i3).modID, blocks.get(i3).thing));
                     }
@@ -235,10 +234,6 @@ public class Main {
 
     @EventHandler
     public static void PostInit(FMLPostInitializationEvent event) {
-        for (CommandContainer s : commands) {
-            System.out.println(s.place);
-            System.out.println(s.command);
-        }
     }
 
     @SubscribeEvent
@@ -261,7 +256,6 @@ public class Main {
         ResourceLocation location = new ResourceLocation(Reference.MOD_ID, name);
         SoundEvent event = new SoundEvent(location)
                 .setRegistryName(filePath + "/Malek's Multiblock Mobs Resources" + name);
-        // soundEffectPath.add(filePath+"/Malek's Multiblock Mobs Resources"+name);
 
         reg.register(event);
 
@@ -276,10 +270,5 @@ public class Main {
 
         return event;
     }
-    // @SubscribeEvent
-    // public static void registerTileEntity()
-    // {
-
-    // }
 
 }

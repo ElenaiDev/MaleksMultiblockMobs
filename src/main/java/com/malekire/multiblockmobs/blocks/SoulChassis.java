@@ -55,7 +55,6 @@ public class SoulChassis extends Block {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
 
     public static final AxisAlignedBB SOUL_CHASSIS_AABB = new AxisAlignedBB(0.25D, 0D, 0.25D, 0.75D, 1, 0.75D);
-    // public TileEntity entityTile = null;
     public Vector<BlockPattern> blockPatterns = new Vector<BlockPattern>();
     private static final Predicate<IBlockState> IS_PUMPKIN = new Predicate<IBlockState>() {
         public boolean apply(@Nullable IBlockState p_apply_1_) {
@@ -63,30 +62,7 @@ public class SoulChassis extends Block {
                     && (p_apply_1_.getBlock() == ModBlocks.soulChassis || p_apply_1_.getBlock() == Blocks.PUMPKIN);
         }
     };
-    // private final int TIMER_COUNTDOWN_TICKS = 20 * 10; // duration of the
-    // countdown, in ticks = 10 seconds
 
-    // Called when the block is placed or loaded client side to get the tile entity
-    // for the block
-    // Should return a new instance of the tile entity for the block
-    // @Override
-    // public TileEntity createTileEntity(World world, IBlockState state) {return
-    // new TileEntityData();}
-
-    // Called just after the player places a block. Start the tileEntity's timer
-    /*
-     * @Override public void onBlockPlacedBy(World worldIn, BlockPos pos,
-     * IBlockState state, EntityLivingBase placer, ItemStack stack) {
-     * super.onBlockPlacedBy(worldIn, pos, state, placer, stack); if
-     * (!worldIn.isRemote) { createTileEntity(worldIn, state); TileEntity tileentity
-     * = worldIn.getTileEntity(pos); if (tileentity instanceof TileEntityData) { //
-     * prevent a crash if not the right type, or is null TileEntityData
-     * tileEntityData = (TileEntityData)tileentity;
-     * tileEntityData.setTicksLeftTillDisappear(TIMER_COUNTDOWN_TICKS); } else {
-     * 
-     * //onBlockPlacedBy(worldIn, pos, state, placer, stack); //
-     * System.out.println("Error"); } } }
-     */
     BlockPos blockPos1 = null;
 
     protected SoulChassis() {
@@ -132,46 +108,6 @@ public class SoulChassis extends Block {
         return BlockRenderLayer.CUTOUT;
 
     }
-    /*
-     * @Override public TileEntity createTileEntity(World world, IBlockState state)
-     * {
-     * 
-     * //return ;
-     * 
-     * }
-     */
-    /*
-     * @Override public void updateTick(World worldIn, BlockPos pos, IBlockState
-     * state, Random rand) {
-     * 
-     * ParticleSpawner.spawnParticle(EobEnumParticleTypes.FLOWER,
-     * blockPos1.getX()+.5, blockPos1.getY()+1, blockPos1.getZ()+.5, 0.0D, -1.0D,
-     * 0.0D); ParticleSpawner.spawnParticle(EobEnumParticleTypes.FLOWER,
-     * blockPos1.getX()+.5, blockPos1.getY()+2, blockPos1.getZ()+.5, 0.0D, -1.0D,
-     * 0.0D); ParticleSpawner.spawnParticle(EobEnumParticleTypes.FLOWER,
-     * blockPos1.getX()+.5, blockPos1.getY()+1, blockPos1.getZ()+.3, 0.0D, -1.0D,
-     * 0.0D);
-     * 
-     * 
-     * 
-     * 
-     * 
-     * }
-     */
-    /*
-     * @Override public void updateTick(World worldIn, BlockPos pos, IBlockState
-     * state, Random rand) {
-     * 
-     * 
-     * ParticleSpawner.spawnParticle(EobEnumParticleTypes.FLOWER,
-     * blockPos1.getX()+.5, blockPos1.getY()+1, blockPos1.getZ()+.5, 0.0D, -1.0D,
-     * 0.0D);
-     * 
-     * 
-     * 
-     * 
-     * }
-     */
 
     /**
      * Called after the block is set in the Chunk data, but before the Tile Entity
@@ -181,8 +117,8 @@ public class SoulChassis extends Block {
             EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
             blockPos1 = pos;
-            // super.onBlockAdded(worldIn, pos, state);
-            // this.trySpawnGolem(worldIn, pos);
+
+            
             this.trySpawnMultiblockMob(worldIn, pos);
             this.trySpawnGolem(worldIn, pos);
             // blockMatcher(worldIn, pos, new SoulChassis());
@@ -193,9 +129,7 @@ public class SoulChassis extends Block {
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-        // onBlockAdded();
     	 this.setDefaultFacing(worldIn, pos, state);
-        // createTileEntity(worldIn, state);
 
     }
     private void setDefaultFacing(World worldIn, BlockPos pos, IBlockState state)
@@ -262,8 +196,8 @@ public class SoulChassis extends Block {
         boolean trueSuccess = false;
         BlockPos blockpos1 = null;
         for (int i6 = 0; i6 < Main.blockPatternContainer.size(); i6++) {
-            // System.out.println(Main.blockPatterns.size());
-
+        	if(Main.dimension.get(i6) == null || worldIn.provider.getDimension() == Main.dimension.get(i6)) {
+        	
             boolean blockSuccess = true;
             int rotation = 0;
             for (int i5 = 0; i5 < Main.blockPatternContainer.get(i6).size(); i5++) {
@@ -278,9 +212,7 @@ public class SoulChassis extends Block {
                 if (blockpattern$patternhelper != null) {
 
                     blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
-                    // System.out.println("Hurra");
                 } else {
-                    // System.out.println("failure");
                     blockSuccess = false;
                     rotation++;
                 }
@@ -302,14 +234,12 @@ public class SoulChassis extends Block {
                         }
                     }
                 }
-                // System.out.println("You Fucking Did It Mate");
             } else {
                 blockSuccess = true;
                 for (int i5 = 0; i5 < Main.blockPatternContainer.get(i6).size(); i5++) {
 
                     BlockPattern theBlockPattern;
                     theBlockPattern = Main.blockPatternContainer.get(i6).get(i5);
-                    // System.out.println(Main.blockPatternContainer.get(i6).size());
 
                     BlockPattern.PatternHelper blockpattern$patternhelper = theBlockPattern.match(worldIn,
                             new BlockPos(pos.getX(), pos.getY(), pos.getZ() - i5));
@@ -317,9 +247,7 @@ public class SoulChassis extends Block {
                     if (blockpattern$patternhelper != null) {
                         blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
 
-                        // System.out.println("Hurra");
                     } else {
-                        // System.out.println("failure");
                         blockSuccess = false;
                         rotation++;
                     }
@@ -341,14 +269,12 @@ public class SoulChassis extends Block {
                             }
                         }
                     }
-                    // System.out.println("You Fucking Did It Mate");
                 } else {
                     blockSuccess = true;
                     for (int i5 = 0; i5 < Main.blockPatternContainer.get(i6).size(); i5++) {
 
                         BlockPattern theBlockPattern;
                         theBlockPattern = Main.blockPatternContainer.get(i6).get(i5);
-                        // System.out.println(Main.blockPatternContainer.get(i6).size());
 
                         BlockPattern.PatternHelper blockpattern$patternhelper = theBlockPattern.match(worldIn,
                                 new BlockPos(pos.getX() + i5, pos.getY(), pos.getZ()));
@@ -356,9 +282,7 @@ public class SoulChassis extends Block {
                         if (blockpattern$patternhelper != null) {
                             blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
 
-                            // System.out.println("Hurra");
                         } else {
-                            // System.out.println("failure");
                             blockSuccess = false;
                             rotation++;
                         }
@@ -379,14 +303,12 @@ public class SoulChassis extends Block {
                                 }
                             }
                         }
-                        // System.out.println("You Fucking Did It Mate");
                     } else {
                         blockSuccess = true;
                         for (int i5 = 0; i5 < Main.blockPatternContainer.get(i6).size(); i5++) {
 
                             BlockPattern theBlockPattern;
                             theBlockPattern = Main.blockPatternContainer.get(i6).get(i5);
-                            // System.out.println(Main.blockPatternContainer.get(i6).size());
 
                             BlockPattern.PatternHelper blockpattern$patternhelper = theBlockPattern.match(worldIn,
                                     new BlockPos(pos.getX() - i5, pos.getY(), pos.getZ()));
@@ -394,9 +316,7 @@ public class SoulChassis extends Block {
                             if (blockpattern$patternhelper != null) {
                                 blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
 
-                                // System.out.println("Hurra");
                             } else {
-                                // System.out.println("failure");
                                 blockSuccess = false;
                                 rotation++;
                             }
@@ -418,18 +338,12 @@ public class SoulChassis extends Block {
                                     }
                                 }
                             }
-                            // System.out.println("You Fucking Did It Mate");
                         }
 
                     }
                 }
             }
             if (trueSuccess) {
-
-                // entitysnowman.setLocationAndAngles((double)blockpos1.getX() + 0.5D,
-                // (double)blockpos1.getY() + 0.05D, (double)blockpos1.getZ() + 0.5D, 0.0F,
-                // 0.0F);
-                // worldIn.spawnEntity(entitysnowman);
 
                 Entity spawnedMob = ForgeRegistries.ENTITIES
                         .getValue(new ResourceLocation(Main.entities.get(i6).modID, Main.entities.get(i6).thing))
@@ -439,39 +353,12 @@ public class SoulChassis extends Block {
                 worldIn.spawnEntity(spawnedMob);
                 for (int i9 = 0; i9 < Main.commands.size(); i9++) {
                     if (Main.commands.get(i9).place == i6) {
-                        // System.out.println("DSUSDFUSD");
-                        // spawnedMob.canUseCommand(4, "say");
                         spawnedMob.getServer().commandManager.executeCommand(spawnedMob, Main.commands.get(i9).command);
-                        // CommonCommandHandler.instance.executeCommand(spawnedMob,
-                        // Main.commands.get(i9).command);
                     }
                 }
-                // worldIn.playSound((double)blockpos1.getX(), (double)blockpos1.getY(),
-                // (double)blockpos1.getZ(), Main.harvesterLaugh, SoundCategory.AMBIENT,
-                // (float)10, (float)1, false);
-                /*
-                 * if(Main.soundEffects.get(i6).Active) {
-                 * spawnedMob.playSound(Main.soundEffects.get(i6).soundEvent, 10, 1); }
-                 * if(Main.music.get(i6).Active) {
-                 * spawnedMob.playSound(Main.music.get(i6).soundEvent, 10, 1); }
-                 */
-                /*
-                 * for (EntityPlayerMP entityplayermp :
-                 * worldIn.getEntitiesWithinAABB(EntityPlayerMP.class,
-                 * spawnedMob.getEntityBoundingBox().grow(5.0D))) {
-                 * //entityplayermp.setRotationYawHead(180);
-                 * if(Main.soundEffects.get(i6).Active) {
-                 * entityplayermp.playSound(Main.soundEffects.get(i6).soundEvent, 100, 1); }
-                 * if(Main.music.get(i6).Active) {
-                 * entityplayermp.playSound(Main.music.get(i6).soundEvent, 100, 1); }
-                 * entityplayermp.playSound(Main.harvesterLaugh, (float)100.0, (float)1.0);
-                 * entityplayermp.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 10, 10,
-                 * false, false)); CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp,
-                 * spawnedMob); }
-                 */
-
                 trueSuccess = false;
             }
+        }
         }
 
     }
@@ -485,12 +372,7 @@ public class SoulChassis extends Block {
                 worldIn.setBlockState(blockworldstate.getPos(), Blocks.AIR.getDefaultState(), 2);
             }
 
-            // EntitySnowman entitysnowman = new EntitySnowman(worldIn);
             BlockPos blockpos1 = blockpattern$patternhelper.translateOffset(0, 2, 0).getPos();
-            // entitysnowman.setLocationAndAngles((double)blockpos1.getX() + 0.5D,
-            // (double)blockpos1.getY() + 0.05D, (double)blockpos1.getZ() + 0.5D, 0.0F,
-            // 0.0F);
-            // worldIn.spawnEntity(entitysnowman);
             if (ModChecker.isHarvesterLoaded) {
 
                 Entity harvester = ForgeRegistries.ENTITIES
@@ -498,9 +380,6 @@ public class SoulChassis extends Block {
                 harvester.setLocationAndAngles((double) blockpos1.getX() + 0.5D, (double) blockpos1.getY() + 0.05D,
                         (double) blockpos1.getZ() + 0.5D, 0.0F, 0.0F);
                 worldIn.spawnEntity(harvester);
-                // worldIn.playSound((double)blockpos1.getX(), (double)blockpos1.getY(),
-                // (double)blockpos1.getZ(), Main.harvesterLaugh, SoundCategory.AMBIENT,
-                // (float)10, (float)1, false);
                 harvester.playSound(Main.harvesterLaugh, 10, 1);
                 for (EntityPlayerMP entityplayermp : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class,
                         harvester.getEntityBoundingBox().grow(5.0D))) {
@@ -534,7 +413,6 @@ public class SoulChassis extends Block {
 
                 BlockPos blockpos = blockpattern$patternhelper.translateOffset(1, 2, 0).getPos();
                 EntitySheep entityirongolem = new EntitySheep(worldIn);
-                // entityirongolem.setPlayerCreated(true);
                 entityirongolem.setLocationAndAngles((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.05D,
                         (double) blockpos.getZ() + 0.5D, 0.0F, 0.0F);
                 worldIn.spawnEntity(entityirongolem);
@@ -566,8 +444,6 @@ public class SoulChassis extends Block {
      */
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
         return true;
-        // worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) &&
-        // worldIn.isSideSolid(pos.down(), EnumFacing.UP);
     }
 
     protected BlockPattern getSnowmanBasePattern() {
@@ -581,8 +457,6 @@ public class SoulChassis extends Block {
 
     protected BlockPattern getSnowmanPattern() {
         if (this.snowmanPattern == null) {
-            // Block hayBlock = ForgeRegistries.BLOCKS.getValue(new
-            // ResourceLocation("minecraft", "hay_block"));
             this.snowmanPattern = FactoryBlockPattern.start().aisle("^", "#", "#")
                     .where('^', BlockWorldState.hasState(IS_PUMPKIN))
                     .where('#', Main.getBlock("minecraft", "hay_block")).build();
@@ -627,16 +501,4 @@ public class SoulChassis extends Block {
         return SOUL_CHASSIS_AABB;
 
     }
-    /*
-     * @Override public void update() { // TODO Auto-generated method stub
-     * ParticleSpawner.spawnParticle(EobEnumParticleTypes.FLOWER,
-     * blockPos1.getX()+.5, blockPos1.getY()+1, blockPos1.getZ()+.5, 0.0D, -1.0D,
-     * 0.0D); }
-     */
-
-    // @Override
-    // public TileEntity createNewTileEntity(World worldIn, int meta) {
-    // TODO Auto-generated method stub
-    // return new TileEntityData();
-    // }//
 }
